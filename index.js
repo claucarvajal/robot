@@ -17,27 +17,46 @@ const supabaseKeyIntermedia  = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_ANON_K
 
 const supabaseIntermedia = createClient(supabaseUrlIntermedia, supabaseKeyIntermedia);
 
+const personaUniqueConstraint = ["documento"];
+
 // Función para realizar operaciones con Supabase
 async function insertarPersona() {
     console.log('La función insertarPersona se está ejecutando...');
   try {
     // Supongamos que tienes una tabla llamada "personas"
-    const { data, error } = await supabase
-      .from('personas')
-      .upsert([
-        {
-          // Aquí puedes proporcionar los datos de la persona a insertar
-          // Por ejemplo, nombre, edad, etc.
-          nombre: 'NombreEjemplo',
-          edad: 25,
-        },
-      ]);
+    let { data: personasIntermedia, error } = await supabaseIntermedia
+    .from('personasintermedia')
+    .select('tipodoc, documento, nombres, fechanacimiento, departamento, municipio, email, embarazo, entidad, regimen, fechaembarazo, riesgo');
 
-    if (error) {
-      console.error('Error al insertar persona:', error.message);
-    } else {
-      console.log('Persona insertada con éxito:', data);
+    for (let persona of personasIntermedia) {
+      let { data, error } = await supabase
+        .from('persona')
+        .upsert([
+          {
+            tipodoc: persona.tipodoc,
+            documento: persona.documento,
+            nombres: persona.nombres,
+            fechanacimiento: persona.fechanacimiento,
+            departamento: persona.departamento,
+            municipio: persona.municipio,
+            email: persona.email,
+            embarazo: persona.embarazo,
+            hijo: "", // Aquí puedes proporcionar el valor para 'hijo'
+            fechaembarazo: persona.fechaembarazo,
+            entidad: persona.entidad,
+            regimen: persona.regimen,
+            riesgo: persona.riesgo,
+          },
+        ], { returning: "minimal", onConflict: personaUniqueConstraint  });
+
+      if (error) {
+        console.error('Error al insertar persona:', error.message);
+      } else {
+        console.log('Persona insertada con éxito:', data);
+      }
     }
+
+  
   } catch (e) {
     console.error('Error general:', e.message);
   }
