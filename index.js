@@ -71,7 +71,7 @@ async function insertarPersona() {
 
     for (let hijo of hijosIntermedia) {
       const hijoData = {
-        responsable: hijo.documento,
+        responsable: hijo.responsable,
         documento: hijo.documento,
         nombres: hijo.nombres,
       };
@@ -100,7 +100,7 @@ async function insertarPersona() {
         documento: vacuna.documento,
         nombre: vacuna.nombre,
         fechavacunacion: vacuna.fechavacunacion,
-        responsable: vacuna.documento,
+        responsable: vacuna.responsable,
       };
 
       let { data, errorVacuna } = await supabase
