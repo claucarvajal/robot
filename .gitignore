@@ -1,0 +1,11 @@
+build
+dist
+node_modules
+stats.json
+webpack-stats.json
+package-lock.json
+
+dhtmlx-gantt-v8.1
+gantt_8.0.0_individual
+
+src/libraries/
