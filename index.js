@@ -2,6 +2,17 @@ const cron = require("node-cron");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
+const { Pool, Client } = require('pg');
+ 
+const pool = new Pool({
+  user: 'postgres',
+  host: 'db.joxrvydcpfckgblgcxwv.supabase.co',
+  database: 'postgres',
+  password: 'F_fu%8X%xYqHJyH',
+  port: 5432,
+})
+ 
+
 // Configura tu conexión con Supabase LOCALES
 const supabaseUrl = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_ANON_KEY;
@@ -166,7 +177,11 @@ cron.schedule(
   async () => {
     // Llama a la función supabe y luego inserta a la persona
     // await supabe();
-    await insertarPersona();
+    // await insertarPersona();
+    // console.log(await pool.query('SELECT * from persona'))
+
+    const res = await pool.query('SELECT * from persona WHERE id = $1', [721])
+    console.log('user:', res.rows);
   },
   {
     scheduled: true,
