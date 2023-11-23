@@ -39,9 +39,10 @@ const hijoUniqueConstraint = ["documento"];
 const vacunaUniqueConstraint = ["documento", "nombre"];
 const controlUniqueConstraint = ["documento", "tipocontrol"];
 
+
 async function envioCorreos() {
-  //Creamos el objeto de transporte
-  //se debe comprar o configurar un servidor de correos
+  // Creamos el objeto de transporte
+  // Se debe comprar o configurar un servidor de correos
   var transporter = nodemailer.createTransport({
     host: process.env.SERVIDOR_CORREO,
     port: process.env.PUERTO_CORREO,
@@ -52,13 +53,34 @@ async function envioCorreos() {
     },
   });
 
-  var mensaje = "Hola desde nodejs...";
+  // Mensaje revisado con estilos básicos
+  var mensaje = `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td style="background-color: #f0f0f0; border: 1px solid #dddddd; border-radius: 8px; padding: 20px; max-width: 400px; text-align: center; font-family: Arial, sans-serif;">
+          <h2 style="font-size: 20px; color: #333333; margin-bottom: 10px;">¡Mensaje Importante!</h2>
+          <p style="font-size: 16px; color: #333333;">
+          Estimado/a [Nombre del destinatario],
+
+          Esperamos sinceramente que se encuentre bien. Nos dirigimos a usted con respecto al control de embarazo que estaba programado en nuestra institución. Lamentablemente, no hemos recibido su presencia en la fecha acordada.
+          
+          Queremos resaltar la vital importancia de este control para su salud y bienestar. Le urgimos amablemente a que se acerque a su EPS lo más pronto posible para llevar a cabo la evaluación necesaria. Estamos aquí para brindarle todo el apoyo que pueda necesitar durante este proceso.
+          
+          Su atención a este asunto es de suma importancia, y agradecemos sinceramente su comprensión y cooperación.
+          
+          Atentamente,
+          Salud y vida
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
 
   var mailOptions = {
     from: "claudiamcarvajal@uts.edu.co",
     to: "claudiamarcelacarvajal27@gmail.com",
-    subject: "Pruebas",
-    text: mensaje,
+    subject: "Mensaje Importante: Control de Embarazo",
+    html: mensaje,
   };
 
   transporter.sendMail(mailOptions, function (error, info) {
@@ -233,6 +255,3 @@ cron.schedule(
     timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
   }
 );
-
-
-
