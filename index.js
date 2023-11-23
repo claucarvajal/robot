@@ -181,7 +181,7 @@ cron.schedule(
   async () => {
     // Llama a la función supabe y luego inserta a la persona
     // await supabe();
-    // await insertarPersona();
+    await insertarPersona();
     // console.log(await pool.query('SELECT * from persona'))
     await envioCorreos();
   },
