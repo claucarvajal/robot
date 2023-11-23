@@ -147,13 +147,12 @@ async function insertarPersona() {
   }
 }
 
-// Programa la tarea para ejecutarse todos los días a las 10:00 AM
-// cron.schedule('0 10 * * *', async () => {
+// Programa la tarea para ejecutarse todos los días a las 12:00 pM
+// cron.schedule('0 24 * * *', async () => {
 //   // Verifica si es la hora programada y luego llama a la función
 //   const now = new Date();
-//   if (now.getHours() === 10 && now.getMinutes() === 0) {
-//     // Llama a la función supabe y luego inserta a la persona
-//     await supabe();
+//   if (now.getHours() === 24 && now.getMinutes() === 0) {
+//     // Llama a la función supabe y luego inserta a la persona   
 //     await insertarPersona();
 //   }
 // }, {
@@ -175,5 +174,5 @@ cron.schedule(
 );
 
 console.log(
-  "El programa ha comenzado y está programado para ejecutarse a las 10:00 AM."
+  "El programa ha comenzado y está programado para ejecutarse a las 12:00 PM."
 );
