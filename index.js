@@ -1,21 +1,21 @@
 const cron = require("node-cron");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
+var nodemailer = require("nodemailer");
 
-const { Pool, Client } = require('pg');
- 
+const { Pool, Client } = require("pg");
+
 const pool = new Pool({
-  user: process.env.USER, 
-  host: process.env.HOST, 
-  database: process.env.DATABASE, 
-  password: process.env.PASSWORD, 
+  user: process.env.USER,
+  host: process.env.HOST,
+  database: process.env.DATABASE,
+  password: process.env.PASSWORD,
   port: 5432,
 });
- 
-async function envioCorreos(){
 
-  const res = await pool.query('SELECT * from persona WHERE id = $1', [721])
-    console.log('user:', res.rows);
+async function envioCorreos() {
+  const res = await pool.query("SELECT * from persona WHERE id = $1", [721]);
+  console.log("user:", res.rows);
 }
 // Configura tu conexión con Supabase LOCALES
 const supabaseUrl = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_URL;
@@ -38,6 +38,37 @@ const personaUniqueConstraint = ["documento"];
 const hijoUniqueConstraint = ["documento"];
 const vacunaUniqueConstraint = ["documento", "nombre"];
 const controlUniqueConstraint = ["documento", "tipocontrol"];
+
+async function envioCorreos() {
+  //Creamos el objeto de transporte
+  //se debe comprar o configurar un servidor de correos
+  var transporter = nodemailer.createTransport({
+    host: process.env.SERVIDOR_CORREO,
+    port: process.env.PUERTO_CORREO,
+    secure: false,
+    auth: {
+      user: process.env.USER_CORREO,
+      pass: process.env.PASS_CORREO,
+    },
+  });
+
+  var mensaje = "Hola desde nodejs...";
+
+  var mailOptions = {
+    from: "claudiamcarvajal@uts.edu.co",
+    to: "claudiamarcelacarvajal27@gmail.com",
+    subject: "Pruebas",
+    text: mensaje,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email enviado: " + info.response);
+    }
+  });
+}
 
 // Función para realizar operaciones con Supabase
 async function insertarPersona() {
@@ -167,7 +198,7 @@ async function insertarPersona() {
 //   // Verifica si es la hora programada y luego llama a la función
 //   const now = new Date();
 //   if (now.getHours() === 24 && now.getMinutes() === 0) {
-//     // Llama a la función supabe y luego inserta a la persona   
+//     // Llama a la función supabe y luego inserta a la persona
 //     await insertarPersona();
 //   }
 // }, {
@@ -178,11 +209,10 @@ async function insertarPersona() {
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    // Llama a la función supabe y luego inserta a la persona
-    // await supabe();
     await insertarPersona();
-    // console.log(await pool.query('SELECT * from persona'))
-    await envioCorreos();
+    console.log(
+      "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
+    );
   },
   {
     scheduled: true,
@@ -190,6 +220,19 @@ cron.schedule(
   }
 );
 
-console.log(
-  "El programa ha comenzado y está programado para ejecutarse a las 12:00 PM."
+cron.schedule(
+  "*/5 * * * * *",
+  async () => {
+    await envioCorreos();
+    console.log(
+      "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
+    );
+  },
+  {
+    scheduled: true,
+    timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
+  }
 );
+
+
+
