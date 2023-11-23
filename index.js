@@ -5,14 +5,18 @@ require("dotenv").config();
 const { Pool, Client } = require('pg');
  
 const pool = new Pool({
-  user: 'postgres',
-  host: 'db.joxrvydcpfckgblgcxwv.supabase.co',
-  database: 'postgres',
-  password: 'F_fu%8X%xYqHJyH',
+  user: process.env.USER, 
+  host: process.env.HOST, 
+  database: process.env.DATABASE, 
+  password: process.env.PASSWORD, 
   port: 5432,
-})
+});
  
+async function envioCorreos(){
 
+  const res = await pool.query('SELECT * from persona WHERE id = $1', [721])
+    console.log('user:', res.rows);
+}
 // Configura tu conexión con Supabase LOCALES
 const supabaseUrl = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_ANON_KEY;
@@ -179,9 +183,7 @@ cron.schedule(
     // await supabe();
     // await insertarPersona();
     // console.log(await pool.query('SELECT * from persona'))
-
-    const res = await pool.query('SELECT * from persona WHERE id = $1', [721])
-    console.log('user:', res.rows);
+    await envioCorreos();
   },
   {
     scheduled: true,
