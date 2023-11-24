@@ -2,6 +2,7 @@ const cron = require("node-cron");
 const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 var nodemailer = require("nodemailer");
+const { differenceInYears, differenceInMonths } = require("date-fns");
 
 const { Pool, Client } = require("pg");
 
@@ -13,9 +14,114 @@ const pool = new Pool({
   port: 5432,
 });
 
-async function envioCorreos() {
-  const res = await pool.query("SELECT * from persona WHERE id = $1", [721]);
-  console.log("user:", res.rows);
+async function envioCorreosValidarEmbarazadas() {
+  // const res = await pool.query("SELECT * from persona WHERE id = $1", [721]);
+  // console.log("user:", res.rows);
+
+  const { data: personasConEmbarazoAltoRiesgo, error: evalErrorPersona } =
+    await supabase.from("persona").select("*").eq("embarazo", "SI");
+
+  // console.log("personasConEmbarazoAltoRiesgo",personasConEmbarazoAltoRiesgo);
+  personasConEmbarazoAltoRiesgo.map(async (persona) => {
+    let datosEnviarCorreo = [];
+
+    const { data: evaluacioncontrolData, error: evalError } = await supabase
+      .from("evaluacioncontrol")
+      .select("*")
+      .eq("documento", persona.documento);
+
+    const { data: controlembarazoData, error: controlError } = await supabase
+      .from("controlembarazo")
+      .select("*");
+
+    // Merge data based on tipocontrol
+    const mergedData = evaluacioncontrolData.map((evalItem) => {
+      const controlItem = controlembarazoData.find(
+        (control) => control.tipocontrol === evalItem.tipocontrol
+      );
+
+      const fechaVisitaCal = evalItem.fechavisita
+        ? new Date(evalItem.fechavisita)
+        : new Date();
+      const monthsDiff = differenceInMonths(
+        fechaVisitaCal,
+        new Date(persona.fechaEmbarazo)
+      );
+      // console.log(
+      //   "monthsDiff",
+      //   monthsDiff,
+      //   fechaEmbarazo,
+      //   evalItem.fechavisita,
+      //   evalItem
+      // );
+
+      let estado = "";
+      let color = "";
+
+      if (evalItem.tipocontrol == "inicial") {
+        estado =
+          monthsDiff >= 0 && monthsDiff <= 3 ? "En rango" : "Fuera de rango";
+        if (monthsDiff >= 0 && monthsDiff <= 3) {
+          color = evalItem.fechavisita ? "green" : "orange";
+        } else {
+          color = evalItem.fechavisita
+            ? "red"
+            : (datosEnviarCorreo = [
+                ...datosEnviarCorreo,
+                {
+                  Tipo: "inicial",
+                  fechavisita: evalItem.fechavisita,
+                  desc: "Pendiente",
+                },
+              ]) /*"yellow"*/;
+        }
+      } else if (evalItem.tipocontrol == "medio") {
+        estado =
+          monthsDiff > 0 && monthsDiff <= 6 ? "En rango" : "Fuera de rango";
+        if (monthsDiff > 0 && monthsDiff <= 6) {
+          color = evalItem.fechavisita ? "green" : "orange";
+        } else {
+          color = evalItem.fechavisita
+            ? "red"
+            : [
+                ...datosEnviarCorreo,
+                {
+                  Tipo: "medio",
+                  fechavisita: evalItem.fechavisita,
+                  desc: "Pendiente",
+                },
+              ];
+        }
+      } else if (evalItem.tipocontrol == "final") {
+        estado =
+          monthsDiff > 0 && monthsDiff <= 9 ? "En rango" : "Fuera de rango";
+        if (monthsDiff > 0 && monthsDiff <= 9) {
+          color = evalItem.fechavisita ? "green" : "orange";
+        } else {
+          color = evalItem.fechavisita
+            ? "red"
+            : [
+                ...datosEnviarCorreo,
+                {
+                  Tipo: "final",
+                  fechavisita: evalItem.fechavisita,
+                  desc: "Pendiente",
+                },
+              ];
+        }
+      }
+      // return { ...evalItem, ...controlItem, estado, monthsDiff, color };
+    });
+
+    // Ordenar mergedData por id del controlembarazo
+    mergedData.sort((a, b) => a.id - b.id);
+    if (datosEnviarCorreo.length > 0) {
+      envioCorreos({
+        correos: "alexanderayaladiaz98@gmail.com" /*persona.correos*/,
+        datosEnviarCorreo: datosEnviarCorreo,
+      });
+    }
+  });
 }
 // Configura tu conexión con Supabase LOCALES
 const supabaseUrl = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_URL;
@@ -39,8 +145,7 @@ const hijoUniqueConstraint = ["documento"];
 const vacunaUniqueConstraint = ["documento", "nombre"];
 const controlUniqueConstraint = ["documento", "tipocontrol"];
 
-
-async function envioCorreos() {
+async function envioCorreos(datos) {
   // Creamos el objeto de transporte
   // Se debe comprar o configurar un servidor de correos
   var transporter = nodemailer.createTransport({
@@ -76,9 +181,31 @@ async function envioCorreos() {
     </table>
   `;
 
+  const table = `
+  <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+    <tr style="background-color: #f0f0f0;">
+      <th style="border: 1px solid #dddddd; padding: 8px;">Tipo</th>
+      <th style="border: 1px solid #dddddd; padding: 8px;">Fecha Visita</th>
+      <th style="border: 1px solid #dddddd; padding: 8px;">Estado</th>
+    </tr>
+    ${datos.datosEnviarCorreo
+      .map(
+        (element) => `
+      <tr>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.Tipo}</td>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.fechavisita}</td>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.desc}</td>
+      </tr>
+    `
+      )
+      .join("")}
+  </table>
+  `;
+  mensaje += table;
+
   var mailOptions = {
     from: "claudiamcarvajal@uts.edu.co",
-    to: "claudiamarcelacarvajal27@gmail.com",
+    to: datos.correos,
     subject: "Mensaje Importante: Control de Embarazo",
     html: mensaje,
   };
@@ -245,7 +372,7 @@ cron.schedule(
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    await envioCorreos();
+    await envioCorreosValidarEmbarazadas();
     console.log(
       "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
     );
