@@ -227,7 +227,7 @@ async function insertarPersona() {
     let { data: personasIntermedia, error } = await supabaseIntermedia
       .from("personasintermedia")
       .select(
-        "tipodoc, documento, nombres, fechanacimiento, departamento, municipio, email, embarazo, entidad, regimen, fechaembarazo, riesgo"
+        "tipodoc, documento, nombres, fechanacimiento, departamento, municipio, email, embarazo, entidad, regimen, fechaembarazo, riesgo, cumple"
       );
 
     for (let persona of personasIntermedia) {
@@ -247,6 +247,7 @@ async function insertarPersona() {
             entidad: persona.entidad,
             regimen: persona.regimen,
             riesgo: persona.riesgo,
+            cumple: persona.cumple,
           },
         ],
         { returning: "minimal", onConflict: personaUniqueConstraint }
@@ -358,7 +359,7 @@ async function insertarPersona() {
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    // await insertarPersona();
+    await insertarPersona();
     console.log(
       "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
     );
@@ -372,7 +373,7 @@ cron.schedule(
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    await envioCorreosValidarEmbarazadas();
+    // await envioCorreosValidarEmbarazadas();
     console.log(
       "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
     );
