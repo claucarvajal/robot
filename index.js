@@ -117,7 +117,7 @@ async function envioCorreosValidarEmbarazadas() {
     mergedData.sort((a, b) => a.id - b.id);
     if (datosEnviarCorreo.length > 0) {
       envioCorreos({
-        correos: "alexanderayaladiaz98@gmail.com" /*persona.correos*/,
+        correos: "claudiamarcelacarvajal27@gmail.com" /*persona.correos*/,
         datosEnviarCorreo: datosEnviarCorreo,
       });
     }
@@ -358,7 +358,7 @@ async function insertarPersona() {
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    await insertarPersona();
+    // await insertarPersona();
     console.log(
       "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
     );
