@@ -65,15 +65,17 @@ async function envioCorreosValidarEmbarazadas() {
           color = evalItem.fechavisita ? "green" : "orange";
         } else {
           color = evalItem.fechavisita
-            ? "red"
+            ? "yellow"
             : (datosEnviarCorreo = [
                 ...datosEnviarCorreo,
                 {
                   Tipo: "inicial",
                   fechavisita: evalItem.fechavisita,
                   desc: "Pendiente",
+                  descripcion:controlItem.descripcion,
+                  nombre:persona.nombres
                 },
-              ]) /*"yellow"*/;
+              ]) /*"red"*/;
         }
       } else if (evalItem.tipocontrol == "medio") {
         estado =
@@ -82,13 +84,15 @@ async function envioCorreosValidarEmbarazadas() {
           color = evalItem.fechavisita ? "green" : "orange";
         } else {
           color = evalItem.fechavisita
-            ? "red"
+            ? "yellow"
             : [
                 ...datosEnviarCorreo,
                 {
                   Tipo: "medio",
                   fechavisita: evalItem.fechavisita,
                   desc: "Pendiente",
+                  descripcion:controlItem.descripcion,
+                  nombre:persona.nombres
                 },
               ];
         }
@@ -99,13 +103,15 @@ async function envioCorreosValidarEmbarazadas() {
           color = evalItem.fechavisita ? "green" : "orange";
         } else {
           color = evalItem.fechavisita
-            ? "red"
+            ? "yellow"
             : [
                 ...datosEnviarCorreo,
                 {
                   Tipo: "final",
                   fechavisita: evalItem.fechavisita,
                   desc: "Pendiente",
+                  descripcion:controlItem.descripcion,
+                  nombre:persona.nombres
                 },
               ];
         }
@@ -119,6 +125,7 @@ async function envioCorreosValidarEmbarazadas() {
       envioCorreos({
         correos: "claudiamarcelacarvajal27@gmail.com" /*persona.correos*/,
         datosEnviarCorreo: datosEnviarCorreo,
+        nombre:persona.nombres
       });
     }
   });
@@ -146,6 +153,7 @@ const vacunaUniqueConstraint = ["documento", "nombre"];
 const controlUniqueConstraint = ["documento", "tipocontrol"];
 
 async function envioCorreos(datos) {
+  console.log(datos, "claud-----");
   // Creamos el objeto de transporte
   // Se debe comprar o configurar un servidor de correos
   var transporter = nodemailer.createTransport({
@@ -165,7 +173,7 @@ async function envioCorreos(datos) {
         <td style="background-color: #f0f0f0; border: 1px solid #dddddd; border-radius: 8px; padding: 20px; max-width: 400px; text-align: center; font-family: Arial, sans-serif;">
           <h2 style="font-size: 20px; color: #333333; margin-bottom: 10px;">¡Mensaje Importante!</h2>
           <p style="font-size: 16px; color: #333333;">
-          Estimado/a [Nombre del destinatario],
+          Estimada ${datos.nombre},
 
           Esperamos sinceramente que se encuentre bien. Nos dirigimos a usted con respecto al control de embarazo que estaba programado en nuestra institución. Lamentablemente, no hemos recibido su presencia en la fecha acordada.
           
@@ -185,6 +193,7 @@ async function envioCorreos(datos) {
   <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
     <tr style="background-color: #f0f0f0;">
       <th style="border: 1px solid #dddddd; padding: 8px;">Tipo</th>
+      <th style="border: 1px solid #dddddd; padding: 8px;">Descripción</th>
       <th style="border: 1px solid #dddddd; padding: 8px;">Fecha Visita</th>
       <th style="border: 1px solid #dddddd; padding: 8px;">Estado</th>
     </tr>
@@ -193,6 +202,7 @@ async function envioCorreos(datos) {
         (element) => `
       <tr>
         <td style="border: 1px solid #dddddd; padding: 8px;">${element.Tipo}</td>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.descripcion}</td>
         <td style="border: 1px solid #dddddd; padding: 8px;">${element.fechavisita}</td>
         <td style="border: 1px solid #dddddd; padding: 8px;">${element.desc}</td>
       </tr>
@@ -215,6 +225,7 @@ async function envioCorreos(datos) {
       console.log(error);
     } else {
       console.log("Email enviado: " + info.response);
+      return true;
     }
   });
 }
@@ -359,10 +370,10 @@ async function insertarPersona() {
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    await insertarPersona();
-    console.log(
-      "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
-    );
+    // await insertarPersona();
+    // console.log(
+    //   "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
+    // );
   },
   {
     scheduled: true,
@@ -373,7 +384,7 @@ cron.schedule(
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    // await envioCorreosValidarEmbarazadas();
+    await envioCorreosValidarEmbarazadas();
     console.log(
       "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
     );
@@ -383,3 +394,17 @@ cron.schedule(
     timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
   }
 );
+
+// cron.schedule(
+//   "0 0 1 * *",
+//   async () => {
+//     // await envioCorreosValidarEmbarazadas();
+//     console.log(
+//       "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
+//     );
+//   },
+//   {
+//     scheduled: true,
+//     timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
+//   }
+// );
