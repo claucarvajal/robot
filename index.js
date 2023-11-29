@@ -14,12 +14,440 @@ const pool = new Pool({
   port: 5432,
 });
 
-async function envioCorreosValidarEmbarazadas() {
-  // const res = await pool.query("SELECT * from persona WHERE id = $1", [721]);
-  // console.log("user:", res.rows);
-
+async function envioCorreosValidarVacunacion() {
   const { data: personasConEmbarazoAltoRiesgo, error: evalErrorPersona } =
-    await supabase.from("persona").select("*").eq("embarazo", "SI");
+    await supabase
+      .from("persona")
+      .select("*")
+      .eq("embarazo", "")
+      .eq("cumple", "pendiente");
+
+  // console.log("personasConEmbarazoAltoRiesgo",personasConEmbarazoAltoRiesgo);
+  personasConEmbarazoAltoRiesgo.map(async (persona) => {
+    let datosEnviarCorreo = [];
+
+    const { data: vacunacionData, error: vacunacionError } = await supabase
+      .from("vacunacion")
+      .select("nombre, descripcion, meses");
+
+    const { data: evaluacionvacunacionData, error: evaluacionvacunacionError } =
+      await supabase
+        .from("evaluacionvacunacion")
+        .select("nombre, fechavacunacion")
+        .eq("documento", persona.documento);
+
+    if (vacunacionData && evaluacionvacunacionData) {
+      const mergedData = vacunacionData.map((v) => {
+        const e = evaluacionvacunacionData.find(
+          (evaluation) => evaluation.nombre === v.nombre
+        );
+
+
+        const fechaVacunac = e ? new Date(e.fechavacunacion) : new Date();
+        const monthsDiff = differenceInMonths(
+          fechaVacunac,
+          new Date(persona.fechanacimiento)
+        );
+
+        console.log("monthsDiff-----", monthsDiff, e);
+
+        let estado = "";
+        let color = "";
+
+        if (v.nombre == "001") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 2 ? "En rango" : "Fuera de rango";
+
+          if (monthsDiff >= 0 && monthsDiff <= 2) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "002") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 2 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 2) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "004") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 3 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 3) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "005") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 3 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 3) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+          // Agregar lógica para el nombre 005
+          // Puedes seguir el mismo patrón de condiciones y asignaciones de estado y color
+        } else if (v.nombre == "006") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 3 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 3) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+          // Agregar lógica para el nombre 006
+          // Puedes seguir el mismo patrón de condiciones y asignaciones de estado y color
+        } else if (v.nombre == "007") {
+          estado =
+            monthsDiff > 0 && monthsDiff <= 3 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 3) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+          // Agregar lógica para el nombre 007
+          // Puedes seguir el mismo patrón de condiciones y asignaciones de estado y color
+        } else if (v.nombre == "008") {
+          estado =
+            monthsDiff > 0 && monthsDiff <= 4 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 4) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+          // Agregar lógica para el nombre 008
+        } else if (v.nombre == "009") {
+          estado =
+            monthsDiff > 0 && monthsDiff <= 4 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 4) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "010") {
+          estado =
+            monthsDiff > 0 && monthsDiff <= 4 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 4) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "011") {
+          estado =
+            monthsDiff > 0 && monthsDiff <= 4 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 4) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "012") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 6 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 6) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "013") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 6 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 6) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "014") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 6 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 6) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "015") {
+          estado =
+            monthsDiff > 0 && monthsDiff <= 7 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 7) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "016") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 13 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 13) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "017") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 13 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 13) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "018") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 13 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 13) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "019") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 13 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 13) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "020") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 13 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 13) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "021") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 19 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 19) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "022") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 19 ? "En rango" : "Fuera de rango";
+          if (monthsDiff >= 0 && monthsDiff <= 19) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "023") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 61 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 61) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "024") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 61 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 61) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        } else if (v.nombre == "025") {
+          estado =
+            monthsDiff >= 0 && monthsDiff <= 61 ? "En rango" : "Fuera de rango";
+          if (monthsDiff > 0 && monthsDiff <= 61) {
+            color = e ? "green" : "orange";
+          } else {
+            color = e
+              ? "yellow"
+              : datosEnviarCorreo.push({
+                  Tipo: v.nombre,
+                  desc: "Pendiente",
+                  descripcion: v.descripcion,
+                  nombre: persona.nombres,
+                });
+          }
+        }
+      });
+      mergedData.sort((a, b) => a.nombre - b.nombre);
+    }
+
+   
+
+    if (datosEnviarCorreo.length > 0) {
+      console.log(persona, datosEnviarCorreo, "ay no");
+
+      envioCorreosVacunacion({
+        correos: "claudiamarcelacarvajal27@gmail.com" /*persona.correos*/,
+        datosEnviarCorreo: datosEnviarCorreo,
+        nombre: persona.nombres,
+      });
+    }
+  });
+}
+
+async function envioCorreosValidarEmbarazadas() {
+  const { data: personasConEmbarazoAltoRiesgo, error: evalErrorPersona } =
+    await supabase
+      .from("persona")
+      .select("*")
+      .eq("embarazo", "SI")
+      .eq("cumple", "pendiente");
 
   // console.log("personasConEmbarazoAltoRiesgo",personasConEmbarazoAltoRiesgo);
   personasConEmbarazoAltoRiesgo.map(async (persona) => {
@@ -45,7 +473,7 @@ async function envioCorreosValidarEmbarazadas() {
         : new Date();
       const monthsDiff = differenceInMonths(
         fechaVisitaCal,
-        new Date(persona.fechaEmbarazo)
+        new Date(persona.fechaembarazo)
       );
       // console.log(
       //   "monthsDiff",
@@ -66,16 +494,12 @@ async function envioCorreosValidarEmbarazadas() {
         } else {
           color = evalItem.fechavisita
             ? "yellow"
-            : (datosEnviarCorreo = [
-                ...datosEnviarCorreo,
-                {
-                  Tipo: "inicial",
-                  fechavisita: evalItem.fechavisita,
-                  desc: "Pendiente",
-                  descripcion:controlItem.descripcion,
-                  nombre:persona.nombres
-                },
-              ]) /*"red"*/;
+            : datosEnviarCorreo.push({
+                Tipo: "inicial",
+                desc: "Pendiente",
+                descripcion: controlItem.descripcion,
+                nombre: persona.nombres,
+              });
         }
       } else if (evalItem.tipocontrol == "medio") {
         estado =
@@ -85,16 +509,12 @@ async function envioCorreosValidarEmbarazadas() {
         } else {
           color = evalItem.fechavisita
             ? "yellow"
-            : [
-                ...datosEnviarCorreo,
-                {
-                  Tipo: "medio",
-                  fechavisita: evalItem.fechavisita,
-                  desc: "Pendiente",
-                  descripcion:controlItem.descripcion,
-                  nombre:persona.nombres
-                },
-              ];
+            : datosEnviarCorreo.push({
+                Tipo: "medio",
+                desc: "Pendiente",
+                descripcion: controlItem.descripcion,
+                nombre: persona.nombres,
+              });
         }
       } else if (evalItem.tipocontrol == "final") {
         estado =
@@ -104,32 +524,30 @@ async function envioCorreosValidarEmbarazadas() {
         } else {
           color = evalItem.fechavisita
             ? "yellow"
-            : [
-                ...datosEnviarCorreo,
-                {
-                  Tipo: "final",
-                  fechavisita: evalItem.fechavisita,
-                  desc: "Pendiente",
-                  descripcion:controlItem.descripcion,
-                  nombre:persona.nombres
-                },
-              ];
+            : datosEnviarCorreo.push({
+                Tipo: "final",
+                desc: "Pendiente",
+                descripcion: controlItem.descripcion,
+                nombre: persona.nombres,
+              });
         }
       }
-      // return { ...evalItem, ...controlItem, estado, monthsDiff, color };
     });
 
     // Ordenar mergedData por id del controlembarazo
     mergedData.sort((a, b) => a.id - b.id);
     if (datosEnviarCorreo.length > 0) {
+      console.log(persona, datosEnviarCorreo, "ay no");
+
       envioCorreos({
         correos: "claudiamarcelacarvajal27@gmail.com" /*persona.correos*/,
         datosEnviarCorreo: datosEnviarCorreo,
-        nombre:persona.nombres
+        nombre: persona.nombres,
       });
     }
   });
 }
+
 // Configura tu conexión con Supabase LOCALES
 const supabaseUrl = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_URL;
 const supabaseKey = process.env.NEXT_PUBLIC_REACT_APP_SUPABASE_ANON_KEY;
@@ -194,7 +612,6 @@ async function envioCorreos(datos) {
     <tr style="background-color: #f0f0f0;">
       <th style="border: 1px solid #dddddd; padding: 8px;">Tipo</th>
       <th style="border: 1px solid #dddddd; padding: 8px;">Descripción</th>
-      <th style="border: 1px solid #dddddd; padding: 8px;">Fecha Visita</th>
       <th style="border: 1px solid #dddddd; padding: 8px;">Estado</th>
     </tr>
     ${datos.datosEnviarCorreo
@@ -203,7 +620,6 @@ async function envioCorreos(datos) {
       <tr>
         <td style="border: 1px solid #dddddd; padding: 8px;">${element.Tipo}</td>
         <td style="border: 1px solid #dddddd; padding: 8px;">${element.descripcion}</td>
-        <td style="border: 1px solid #dddddd; padding: 8px;">${element.fechavisita}</td>
         <td style="border: 1px solid #dddddd; padding: 8px;">${element.desc}</td>
       </tr>
     `
@@ -217,6 +633,84 @@ async function envioCorreos(datos) {
     from: "claudiamcarvajal@uts.edu.co",
     to: datos.correos,
     subject: "Mensaje Importante: Control de Embarazo",
+    html: mensaje,
+  };
+
+  transporter.sendMail(mailOptions, function (error, info) {
+    if (error) {
+      console.log(error);
+    } else {
+      console.log("Email enviado: " + info.response);
+      return true;
+    }
+  });
+}
+
+async function envioCorreosVacunacion(datos) {
+  console.log(datos, "claud-----");
+  // Creamos el objeto de transporte
+  // Se debe comprar o configurar un servidor de correos
+  var transporter = nodemailer.createTransport({
+    host: process.env.SERVIDOR_CORREO,
+    port: process.env.PUERTO_CORREO,
+    secure: false,
+    auth: {
+      user: process.env.USER_CORREO,
+      pass: process.env.PASS_CORREO,
+    },
+  });
+
+  // Mensaje revisado con estilos básicos
+  var mensaje = `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+      <tr>
+        <td style="background-color: #f0f0f0; border: 1px solid #dddddd; border-radius: 8px; padding: 20px; max-width: 400px; text-align: center; font-family: Arial, sans-serif;">
+          <h2 style="font-size: 20px; color: #333333; margin-bottom: 10px;">¡Mensaje Importante!</h2>
+          <p style="font-size: 16px; color: #333333;">
+          Estimada ${datos.nombre},
+
+          Esperamos sinceramente que tanto usted como su hij@ se encuentren bien. Nos dirigimos a usted con respecto a la cita de vacunación programada para su hijo en nuestra institución. Lamentablemente, no hemos registrado la asistencia de su hijo en la fecha acordada.
+
+          Queremos subrayar la vital importancia de mantener al día las vacunas para garantizar la salud y bienestar de su hijo. Le instamos amablemente a que lo lleve a la clínica o centro de vacunación designado lo antes posible para completar el esquema de vacunación necesario. Estamos aquí para proporcionarle todo el apoyo necesario durante este proceso.
+          
+          La atención a este asunto es crucial, y agradecemos sinceramente su comprensión y colaboración en este asunto tan importante para la salud de su hijo y la comunidad en general.
+          
+          Si tiene alguna pregunta o necesita más información, no dude en ponerse en contacto con nosotros. Agradecemos de antemano su cooperación y estamos aquí para ayudarle en todo lo que necesite
+          
+          Atentamente,
+          Salud y vida
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const table = `
+  <table style="border-collapse: collapse; width: 100%; border: 1px solid #dddddd;">
+    <tr style="background-color: #f0f0f0;">
+      <th style="border: 1px solid #dddddd; padding: 8px;">Tipo</th>
+      <th style="border: 1px solid #dddddd; padding: 8px;">Descripción</th>
+      <th style="border: 1px solid #dddddd; padding: 8px;">Estado</th>
+    </tr>
+    ${datos.datosEnviarCorreo
+      .map(
+        (element) => `
+      <tr>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.Tipo}</td>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.descripcion}</td>
+        <td style="border: 1px solid #dddddd; padding: 8px;">${element.desc}</td>
+      </tr>
+    `
+      )
+      .join("")}
+  </table>
+  `;
+  mensaje += table;
+
+  var mailOptions = {
+    from: "claudiamcarvajal@uts.edu.co",
+    to: datos.correos,
+    subject: "Mensaje Importante: Control de vacunación",
     html: mensaje,
   };
 
@@ -370,23 +864,9 @@ async function insertarPersona() {
 cron.schedule(
   "*/5 * * * * *",
   async () => {
-    // await insertarPersona();
-    // console.log(
-    //   "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
-    // );
-  },
-  {
-    scheduled: true,
-    timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
-  }
-);
-
-cron.schedule(
-  "*/5 * * * * *",
-  async () => {
-    await envioCorreosValidarEmbarazadas();
+    await insertarPersona();
     console.log(
-      "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
+      "WEB: El programa ha comenzado y está programado para ejecutarse todos los días a las 12:00 PM."
     );
   },
   {
@@ -395,16 +875,33 @@ cron.schedule(
   }
 );
 
-// cron.schedule(
-//   "0 0 1 * *",
-//   async () => {
-//     // await envioCorreosValidarEmbarazadas();
-//     console.log(
-//       "CORREO: El programa ha comenzado  y está programado para ejecutarse cada mes a las 12:00 PM."
-//     );
-//   },
-//   {
-//     scheduled: true,
-//     timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
-//   }
-// );
+//CONTROL EMBARAZO
+cron.schedule(
+  "18 18 * * *",
+  async () => {
+    await envioCorreosValidarEmbarazadas();
+    console.log(
+      "CORREO CONTRAL: El programa ha comenzado  y está programado para ejecutarse cada mes a las 09:05 PM."
+    );
+  },
+  {
+    scheduled: true,
+    timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
+  }
+);
+
+//CONTROL VACUNACIÓN
+cron.schedule(
+  "18 18 * * *",
+  async () => {
+    await envioCorreosValidarVacunacion();
+    console.log(
+      "CORREO VACUNAS: El programa ha comenzado y está programado para ejecutarse cada mes a las 10:05 PM."
+    );
+  },
+  {
+    scheduled: true,
+    timezone: "America/New_York", // Ajusta la zona horaria según tu ubicación
+  }
+);
+
